@@ -9,15 +9,33 @@
 .moon-end-icon .disc:after{content:"";position:absolute;left:2px;top:0;width:18px;height:28px;border-radius:50%;background:#20252a;opacity:.72}
 @media(min-width:800px){#terrainBox{right:auto;width:520px}}
 </style>
+
+<style>
+.panel-toggle{border:0;background:#33404a;color:#fff;border-radius:9px;padding:3px 9px;font-size:18px;line-height:1.2;cursor:pointer}
+.collapsible-body{overflow:hidden}
+.is-collapsed .collapsible-body{display:none!important}
+.is-collapsed{padding-bottom:7px!important}
+#controls .collapse-row{display:flex;justify-content:flex-end;margin-bottom:4px}
+#controls.is-collapsed{position:absolute;z-index:800;right:10px;bottom:10px;width:auto!important;height:auto!important;padding:6px!important;border-radius:12px}
+#controls.is-collapsed .collapse-row{margin:0}
+#terrainBox.is-collapsed{right:auto;width:auto!important}
+#terrainBox.is-collapsed .terrainHead{gap:10px}
+#terrainBox.is-collapsed #terrainCalc{display:none}
+#terrainBox.is-collapsed #terrainStatus,#terrainBox.is-collapsed #terrainResult{display:none}
+@media(max-width:700px){
+  #terrainBox{top:142px}
+  #controls{transition:none}
+}
+</style>
 </head><body>
 <div id="map"></div><header><div><b>MoonMap</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
 <section id="info"><span>🌙</span><div><small>AZIMUT</small><b id="az">–</b></div><div><small>HØYDE</small><b id="alt">–</b></div><div><small>LYS</small><b id="ill">–</b></div><div><small>OPP / NED</small><b id="rs">–</b></div></section>
 <section id="terrainBox">
-      <div class="terrainHead"><b>⛰ Terrenghorisont</b><button id="terrainCalc">Beregn</button></div>
+      <div class="terrainHead"><b>⛰ Terrenghorisont</b><span><button id="terrainCalc">Beregn</button> <button class="panel-toggle" data-target="terrainBox" aria-label="Minimer">−</button></span></div>
       <div id="terrainStatus">Bruk HTTPS for høydedata.</div>
       <div id="terrainResult"></div>
     </section>
-    <section id="controls"><div class="dates"><input id="date" type="date"><input id="time" type="time"></div><input id="slider" type="range" min="0" max="1439"><div class="labels"><span>00:00</span><b id="st">–</b><span>23:59</span></div><div class="buttons"><button data-s="-1440">−1 dag</button><button data-s="-60">−1t</button><button id="now">NÅ</button><button data-s="60">+1t</button><button data-s="1440">+1 dag</button></div><label><input id="path" type="checkbox" checked> Vis månebane gjennom døgnet</label></section>
+    <section id="controls"><div class="collapse-row"><button class="panel-toggle" data-target="controls" aria-label="Minimer">−</button></div><div class="collapsible-body"><div class="dates"><input id="date" type="date"><input id="time" type="time"></div><input id="slider" type="range" min="0" max="1439"><div class="labels"><span>00:00</span><b id="st">–</b><span>23:59</span></div><div class="buttons"><button data-s="-1440">−1 dag</button><button data-s="-60">−1t</button><button id="now">NÅ</button><button data-s="60">+1t</button><button data-s="1440">+1 dag</button></div><label><input id="path" type="checkbox" checked> Vis månebane gjennom døgnet</label></div></section>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const R=Math.PI/180,D=180/Math.PI;function n(x){return(x%360+360)%360}function jd(t){return t.getTime()/864e5+2440587.5}function gm(t){let j=jd(t),T=(j-2451545)/36525;return n(280.46061837+360.98564736629*(j-2451545)+.000387933*T*T-T*T*T/38710000)}
 function eq(t){let d=jd(t)-2451543.5,N=n(125.1228-.0529538083*d)*R,i=5.1454*R,w=n(318.0634+.1643573223*d)*R,a=60.2666,e=.0549,M=n(115.3654+13.0649929509*d)*R,E=M+e*Math.sin(M)*(1+e*Math.cos(M));for(let k=0;k<5;k++)E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));let xv=a*(Math.cos(E)-e),yv=a*Math.sqrt(1-e*e)*Math.sin(E),v=Math.atan2(yv,xv),r=Math.hypot(xv,yv),xh=r*(Math.cos(N)*Math.cos(v+w)-Math.sin(N)*Math.sin(v+w)*Math.cos(i)),yh=r*(Math.sin(N)*Math.cos(v+w)+Math.cos(N)*Math.sin(v+w)*Math.cos(i)),zh=r*Math.sin(v+w)*Math.sin(i),lo=Math.atan2(yh,xh),la=Math.atan2(zh,Math.hypot(xh,yh)),Ms=n(356.047+.9856002585*d)*R,ws=n(282.9404+4.70935e-5*d)*R,Ls=Ms+ws,Lm=N+w+M,dd=Lm-Ls,F=Lm-N;lo+=(-1.274*Math.sin(M-2*dd)+.658*Math.sin(2*dd)-.186*Math.sin(Ms)-.059*Math.sin(2*M-2*dd)-.057*Math.sin(M-2*dd+Ms)+.053*Math.sin(M+2*dd)+.046*Math.sin(2*dd-Ms)+.041*Math.sin(M-Ms)-.035*Math.sin(dd)-.031*Math.sin(M+Ms)-.015*Math.sin(2*F-2*dd)+.011*Math.sin(M-4*dd))*R;la+=(-.173*Math.sin(F-2*dd)-.055*Math.sin(M-F-2*dd)-.046*Math.sin(M+F-2*dd)+.033*Math.sin(F+2*dd)+.017*Math.sin(2*M+F))*R;let ob=(23.4393-3.563e-7*d)*R,x=Math.cos(lo)*Math.cos(la),y=Math.sin(lo)*Math.cos(la),z=Math.sin(la),ye=y*Math.cos(ob)-z*Math.sin(ob),ze=y*Math.sin(ob)+z*Math.cos(ob);return{ra:Math.atan2(ye,x),dec:Math.atan2(ze,Math.hypot(x,ye)),lon:lo}}
 function sl(t){let d=jd(t)-2451543.5,M=n(356.047+.9856002585*d)*R,w=n(282.9404+4.70935e-5*d)*R,e=.016709-1.151e-9*d,E=M+e*Math.sin(M)*(1+e*Math.cos(M)),x=Math.cos(E)-e,y=Math.sqrt(1-e*e)*Math.sin(E);return n((Math.atan2(y,x)+w)*D)*R}
@@ -61,75 +79,67 @@ function secureContextMessage(){
 // HTTPS-first elevation providers. Kartverket is attempted first. A second public HTTPS
 // elevation endpoint is used as fallback so the app can still calculate when a browser
 // rejects one provider due to CORS or endpoint changes.
-async function fetchJson(url, timeout=9000){
-  const c=new AbortController(), id=setTimeout(()=>c.abort(),timeout);
+
+async function fetchJson(url, timeout=12000){
+  const c=new AbortController(),id=setTimeout(()=>c.abort(),timeout);
   try{const r=await fetch(url,{mode:'cors',signal:c.signal,cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json();}
   finally{clearTimeout(id)}
 }
-function extractElevation(j){
-  const vals=[
-    j?.hoyde,j?.høyde,j?.elevation,j?.z,j?.punkt?.hoyde,j?.punkt?.høyde,j?.punkt?.elevation,
-    j?.data?.hoyde,j?.data?.elevation,j?.results?.[0]?.elevation
-  ];
-  if(Array.isArray(j)&&j.length) vals.push(j[0]?.hoyde,j[0]?.høyde,j[0]?.elevation,j[0]?.z);
-  const v=vals.find(x=>Number.isFinite(Number(x))); if(v===undefined)throw new Error('ukjent svarformat'); return Number(v);
-}
-async function elevationAt(lat,lon){
-  const attempts=[
-    // Kartverket/Geonorge HTTPS REST variants (API deployments have changed over time).
-    `https://ws.geonorge.no/hoydedata/v1/punkt?koordsys=4326&nord=${encodeURIComponent(lat)}&ost=${encodeURIComponent(lon)}`,
-    `https://ws.geonorge.no/hoydedata/v1/punkt?koordsys=4258&nord=${encodeURIComponent(lat)}&ost=${encodeURIComponent(lon)}`,
-    // HTTPS fallback: Open-Meteo elevation API.
-    `https://api.open-meteo.com/v1/elevation?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`
-  ];
-  let errors=[];
-  for(const u of attempts){
-    try{return extractElevation(await fetchJson(u));}
-    catch(e){errors.push(e.message)}
-  }
-  throw new Error(errors.join(' / '));
+async function elevationsBatch(points){
+  const lat=points.map(p=>p.lat.toFixed(6)).join(',');
+  const lon=points.map(p=>p.lng.toFixed(6)).join(',');
+  const j=await fetchJson(`https://api.open-meteo.com/v1/elevation?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`);
+  let a=j.elevation;
+  if(!Array.isArray(a)) a=[a];
+  if(a.length!==points.length || a.some(v=>!Number.isFinite(Number(v)))) throw new Error('Ugyldig høydesvar');
+  return a.map(Number);
 }
 async function terrainHorizonForAzimuth(az,maxKm=20){
-  const obs=await elevationAt(pt.lat,pt.lng);
-  let best={angle:-90,distance:0,elev:obs};
   let ds=[];
   for(let k=.15;k<=2;k+=.15)ds.push(k);
   for(let k=2.3;k<=5;k+=.3)ds.push(k);
   for(let k=5.6;k<=maxKm;k+=.6)ds.push(k);
-  for(const km of ds){
-    const q=dest(pt,az,km), h=await elevationAt(q.lat,q.lng);
-    const curvature=(km*1000)*(km*1000)/(2*6371000);
+  const pts=[{lat:pt.lat,lng:pt.lng},...ds.map(k=>dest(pt,az,k))];
+  const hs=await elevationsBatch(pts),obs=hs[0];
+  let best={angle:-90,distance:0,elev:obs};
+  ds.forEach((km,i)=>{
+    const h=hs[i+1],curvature=(km*1000)*(km*1000)/(2*6371000);
     const angle=Math.atan2(h-obs-curvature,km*1000)*D;
     if(angle>best.angle)best={angle,distance:km,elev:h};
-  }
+  });
   return {obs,...best};
 }
 async function calculateTerrainClearance(){
-  const status=document.getElementById('terrainStatus'), out=document.getElementById('terrainResult');
-  const sec=secureContextMessage();
-  if(sec){status.textContent='⚠ '+sec;out.textContent='';return;}
-  status.textContent='Henter høydedata via HTTPS …'; out.textContent='';
+  const status=document.getElementById('terrainStatus'),out=document.getElementById('terrainResult');
+  const sec=secureContextMessage(); if(sec){status.textContent='⚠ '+sec;return;}
+  status.textContent='Henter terrengprofil …';out.textContent='';
   try{
-    const base=dt(); let cache={},found=null;
-    // 10-minute scan, 2-degree azimuth buckets to keep network load reasonable.
-    for(let min=0;min<=1080;min+=10){
+    const base=dt(); let found=null;
+    // Calculate the horizon for the moon direction at each 20-minute step.
+    // Each profile is one batched HTTPS request instead of dozens of requests.
+    for(let min=0;min<=1080;min+=20){
       const t=new Date(base.getTime()+min*60000),m=moonPosition(t,pt.lat,pt.lng);
       if(m.alt<=-1)continue;
-      const bucket=Math.round(m.az/2)*2;
-      if(!cache[bucket])cache[bucket]=await terrainHorizonForAzimuth(bucket,20);
-      const h=cache[bucket];
-      if(m.alt>h.angle){found={t,m,h};break;}
+      const h=await terrainHorizonForAzimuth(m.az,20);
+      if(m.alt>h.angle){found={t,m,h};break}
     }
     status.textContent='✓ Høydedata mottatt';
     if(found){
       const {t,m,h}=found;
-      out.innerHTML=`Månen går klar av terrenget ca. <b>${fmt(t)}</b> · azimut ${m.az.toFixed(1)}° · høydevinkel ${m.alt.toFixed(1)}°<br>Terrenghorisont ${h.angle.toFixed(1)}° · høyeste blokkering ca. ${h.distance.toFixed(1)} km unna (${Math.round(h.elev)} moh.)`;
-    }else out.textContent='Fant ikke terrengklaring innen 18 timer fra valgt tidspunkt.';
-  }catch(e){
-    status.textContent='⚠ Høydedata kunne ikke hentes';
-    out.textContent='Sjekk at MoonMap åpnes fra HTTPS (eller localhost). Nettleseren/API-et kan også blokkere CORS. Feil: '+e.message;
-  }
+      out.innerHTML=`Månen går klar av terrenget ca. <b>${fmt(t)}</b> · azimut ${m.az.toFixed(1)}° · høydevinkel ${m.alt.toFixed(1)}°<br>Terrenghorisont ${h.angle.toFixed(1)}° · blokkering ca. ${h.distance.toFixed(1)} km unna (${Math.round(h.elev)} moh.)`;
+    }else out.textContent='Fant ikke terrengklaring innen 18 timer.';
+  }catch(e){status.textContent='⚠ Kunne ikke hente høydedata';out.textContent='Feil: '+e.message}
 }
 document.getElementById('terrainCalc').onclick=calculateTerrainClearance;
 const msg=secureContextMessage(); if(msg)document.getElementById('terrainStatus').textContent='⚠ '+msg;
+</script><script>
+document.querySelectorAll('.panel-toggle').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const el=document.getElementById(b.dataset.target);
+    const c=el.classList.toggle('is-collapsed');
+    b.textContent=c?'+':'−';
+    b.setAttribute('aria-label',c?'Utvid':'Minimer');
+    setTimeout(()=>map.invalidateSize(),20);
+  });
+});
 </script></body></html>
