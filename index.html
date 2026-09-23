@@ -1,0 +1,135 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101418"><title>MoonMap</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>*{box-sizing:border-box}html,body{height:100%;margin:0;background:#101418;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}#map{position:absolute;inset:0 0 215px}.leaflet-control-attribution{font-size:9px}header{position:absolute;z-index:500;top:12px;left:55px;right:12px;background:#101418e8;border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 15px #0008}header b{font-size:19px}header small{display:block;color:#aeb8be}button{border:0;border-radius:9px;padding:9px 10px;background:#29343b;color:#fff;font-weight:700}#info{position:absolute;z-index:500;top:79px;left:12px;right:12px;background:#101418e8;border-radius:14px;padding:9px;display:grid;grid-template-columns:45px repeat(4,1fr);text-align:center;align-items:center}#info>span{font-size:28px}#info small{display:block;font-size:9px;color:#9faab1}#info b{font-size:13px}#controls{position:absolute;z-index:500;bottom:0;left:0;right:0;min-height:215px;background:#101418f7;padding:12px 14px max(12px,env(safe-area-inset-bottom));box-shadow:0 -3px 15px #0008}.dates{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dates input{background:#222d34;color:#fff;border:1px solid #46525a;border-radius:8px;padding:7px;color-scheme:dark}#slider{width:100%;margin-top:12px}.labels{display:flex;justify-content:space-between;font-size:11px;color:#abb6bc}.labels b{color:#fff}.buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}.buttons button{font-size:11px;padding:9px 2px}label{font-size:12px;color:#c5ced3}@media(min-width:800px){#map{inset:0}#controls{left:auto;right:12px;bottom:12px;width:430px;border-radius:15px}#info{right:auto;width:520px}}</style>
+<style>
+#terrainBox{position:absolute;z-index:500;left:12px;right:12px;top:142px;background:#101418e8;border-radius:14px;padding:9px 10px;font-size:12px;box-shadow:0 3px 15px #0006}
+.terrainHead{display:flex;justify-content:space-between;align-items:center}.terrainHead button{padding:5px 9px}
+#terrainStatus{color:#aeb8be;margin-top:4px}#terrainResult{color:#dbe3e7;margin-top:4px;line-height:1.35}
+.moon-end-icon{background:transparent!important;border:0!important}
+.moon-end-icon .disc{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 68% 40%,#fff8c9 0 28%,#ead37d 48%,#8b793b 100%);box-shadow:0 0 8px #fff7b6,0 0 2px #000;position:relative}
+.moon-end-icon .disc:after{content:"";position:absolute;left:2px;top:0;width:18px;height:28px;border-radius:50%;background:#20252a;opacity:.72}
+@media(min-width:800px){#terrainBox{right:auto;width:520px}}
+</style>
+</head><body>
+<div id="map"></div><header><div><b>MoonMap</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
+<section id="info"><span>🌙</span><div><small>AZIMUT</small><b id="az">–</b></div><div><small>HØYDE</small><b id="alt">–</b></div><div><small>LYS</small><b id="ill">–</b></div><div><small>OPP / NED</small><b id="rs">–</b></div></section>
+<section id="terrainBox">
+      <div class="terrainHead"><b>⛰ Terrenghorisont</b><button id="terrainCalc">Beregn</button></div>
+      <div id="terrainStatus">Bruk HTTPS for høydedata.</div>
+      <div id="terrainResult"></div>
+    </section>
+    <section id="controls"><div class="dates"><input id="date" type="date"><input id="time" type="time"></div><input id="slider" type="range" min="0" max="1439"><div class="labels"><span>00:00</span><b id="st">–</b><span>23:59</span></div><div class="buttons"><button data-s="-1440">−1 dag</button><button data-s="-60">−1t</button><button id="now">NÅ</button><button data-s="60">+1t</button><button data-s="1440">+1 dag</button></div><label><input id="path" type="checkbox" checked> Vis månebane gjennom døgnet</label></section>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>const R=Math.PI/180,D=180/Math.PI;function n(x){return(x%360+360)%360}function jd(t){return t.getTime()/864e5+2440587.5}function gm(t){let j=jd(t),T=(j-2451545)/36525;return n(280.46061837+360.98564736629*(j-2451545)+.000387933*T*T-T*T*T/38710000)}
+function eq(t){let d=jd(t)-2451543.5,N=n(125.1228-.0529538083*d)*R,i=5.1454*R,w=n(318.0634+.1643573223*d)*R,a=60.2666,e=.0549,M=n(115.3654+13.0649929509*d)*R,E=M+e*Math.sin(M)*(1+e*Math.cos(M));for(let k=0;k<5;k++)E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));let xv=a*(Math.cos(E)-e),yv=a*Math.sqrt(1-e*e)*Math.sin(E),v=Math.atan2(yv,xv),r=Math.hypot(xv,yv),xh=r*(Math.cos(N)*Math.cos(v+w)-Math.sin(N)*Math.sin(v+w)*Math.cos(i)),yh=r*(Math.sin(N)*Math.cos(v+w)+Math.cos(N)*Math.sin(v+w)*Math.cos(i)),zh=r*Math.sin(v+w)*Math.sin(i),lo=Math.atan2(yh,xh),la=Math.atan2(zh,Math.hypot(xh,yh)),Ms=n(356.047+.9856002585*d)*R,ws=n(282.9404+4.70935e-5*d)*R,Ls=Ms+ws,Lm=N+w+M,dd=Lm-Ls,F=Lm-N;lo+=(-1.274*Math.sin(M-2*dd)+.658*Math.sin(2*dd)-.186*Math.sin(Ms)-.059*Math.sin(2*M-2*dd)-.057*Math.sin(M-2*dd+Ms)+.053*Math.sin(M+2*dd)+.046*Math.sin(2*dd-Ms)+.041*Math.sin(M-Ms)-.035*Math.sin(dd)-.031*Math.sin(M+Ms)-.015*Math.sin(2*F-2*dd)+.011*Math.sin(M-4*dd))*R;la+=(-.173*Math.sin(F-2*dd)-.055*Math.sin(M-F-2*dd)-.046*Math.sin(M+F-2*dd)+.033*Math.sin(F+2*dd)+.017*Math.sin(2*M+F))*R;let ob=(23.4393-3.563e-7*d)*R,x=Math.cos(lo)*Math.cos(la),y=Math.sin(lo)*Math.cos(la),z=Math.sin(la),ye=y*Math.cos(ob)-z*Math.sin(ob),ze=y*Math.sin(ob)+z*Math.cos(ob);return{ra:Math.atan2(ye,x),dec:Math.atan2(ze,Math.hypot(x,ye)),lon:lo}}
+function sl(t){let d=jd(t)-2451543.5,M=n(356.047+.9856002585*d)*R,w=n(282.9404+4.70935e-5*d)*R,e=.016709-1.151e-9*d,E=M+e*Math.sin(M)*(1+e*Math.cos(M)),x=Math.cos(E)-e,y=Math.sqrt(1-e*e)*Math.sin(E);return n((Math.atan2(y,x)+w)*D)*R}
+function moonPosition(t,lat,lon){let m=eq(t),H=(gm(t)+lon)*R-m.ra,p=lat*R,alt=Math.asin(Math.sin(p)*Math.sin(m.dec)+Math.cos(p)*Math.cos(m.dec)*Math.cos(H)),az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(p)-Math.tan(m.dec)*Math.cos(p))+Math.PI,el=Math.acos(Math.cos(m.lon-sl(t)));return{az:n(az*D),alt:alt*D,illum:(1-Math.cos(el))/2}}
+function moonRiseSet(t,lat,lon){let s=new Date(t);s.setHours(0,0,0,0);let prev=moonPosition(s,lat,lon).alt,rise=null,set=null;for(let q=5;q<=1440;q+=5){let x=new Date(s.getTime()+q*6e4),a=moonPosition(x,lat,lon).alt;if(prev<=0&&a>0&&!rise)rise=x;if(prev>=0&&a<0&&!set)set=x;prev=a}return{rise,set}}</script><script>const $=x=>document.getElementById(x);let pt={lat:62.2,lng:6.1},marker,ray,track;
+const map=L.map('map',{zoomControl:true}).setView([pt.lat,pt.lng],9);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+map.on('click',e=>setPt({lat:e.latlng.lat,lng:e.latlng.lng}));
+function setPt(p){pt=p;if(marker)marker.remove();marker=L.circleMarker([p.lat,p.lng],{radius:7,weight:3,fillOpacity:1}).addTo(map);update()}
+function dest(p,b,km){let d=km/6371,B=b*R,a=p.lat*R,l=p.lng*R,a2=Math.asin(Math.sin(a)*Math.cos(d)+Math.cos(a)*Math.sin(d)*Math.cos(B)),l2=l+Math.atan2(Math.sin(B)*Math.sin(d)*Math.cos(a),Math.cos(d)-Math.sin(a)*Math.sin(a2));return{lat:a2*D,lng:l2*D}}
+function dt(){return new Date($('date').value+'T'+$('time').value+':00')}function fmt(t){return t?t.toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'}):'–'}
+function sync(d){let p=x=>String(x).padStart(2,'0');$('date').value=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());$('time').value=p(d.getHours())+':'+p(d.getMinutes())}
+function update(){let t=dt();if(isNaN(t))return;let m=moonPosition(t,pt.lat,pt.lng),rs=moonRiseSet(t,pt.lat,pt.lng);$('az').textContent=m.az.toFixed(1)+'°';$('alt').textContent=m.alt.toFixed(1)+'°';$('ill').textContent=Math.round(m.illum*100)+'%';$('rs').textContent=fmt(rs.rise)+' / '+fmt(rs.set);$('slider').value=t.getHours()*60+t.getMinutes();$('st').textContent=fmt(t);if(ray)ray.remove();let end=dest(pt,m.az,20);ray=L.polyline([[pt.lat,pt.lng],[end.lat,end.lng]],{weight:4,opacity:.9}).addTo(map);if(track)track.remove();if($('path').checked){let s=new Date(t);s.setHours(0,0,0,0);let a=[];for(let q=0;q<1440;q+=30){let z=new Date(s.getTime()+q*6e4),v=moonPosition(z,pt.lat,pt.lng);if(v.alt>0){let e=dest(pt,v.az,3+Math.min(10,v.alt*.12));a.push([e.lat,e.lng])}}track=L.polyline(a,{weight:2,opacity:.55,dashArray:'5,7'}).addTo(map)}}
+sync(new Date());setPt(pt);$('date').onchange=update;$('time').onchange=update;$('path').onchange=update;$('slider').oninput=e=>{let t=dt(),m=+e.target.value;t.setHours(Math.floor(m/60),m%60,0,0);sync(t);update()};document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{let t=new Date(dt().getTime()+Number(b.dataset.s)*6e4);sync(t);update()});$('now').onclick=()=>{sync(new Date());update()};$('loc').onclick=()=>navigator.geolocation&&navigator.geolocation.getCurrentPosition(x=>{let p={lat:x.coords.latitude,lng:x.coords.longitude};setPt(p);map.setView([p.lat,p.lng],13)},()=>alert('Ingen tilgang til posisjon. Trykk ønsket punkt i kartet.'));</script><script>
+let moonEndMarker=null;
+const _moonmapOldUpdate=update;
+update=function(){
+  _moonmapOldUpdate();
+  if(!map)return;
+  const t=dt(); if(isNaN(t))return;
+  const m=moonPosition(t,pt.lat,pt.lng);
+  // Keep the line visually useful at every zoom: its geographic length follows the visible map size.
+  const bounds=map.getBounds();
+  const ne=bounds.getNorthEast(), sw=bounds.getSouthWest();
+  const mapKm=Math.max(1,map.distance(sw,ne)/1000);
+  const end=dest(pt,m.az,mapKm*0.34);
+  if(ray)ray.setLatLngs([[pt.lat,pt.lng],[end.lat,end.lng]]);
+  if(moonEndMarker)moonEndMarker.remove();
+  const icon=L.divIcon({className:'moon-end-icon',html:'<div class="disc"></div>',iconSize:[28,28],iconAnchor:[14,14]});
+  moonEndMarker=L.marker([end.lat,end.lng],{icon,interactive:false,zIndexOffset:900}).addTo(map);
+};
+map.on('zoomend moveend',()=>update());
+
+
+function secureContextMessage(){
+  if(location.protocol!=='https:' && location.hostname!=='localhost' && location.hostname!=='127.0.0.1')
+    return 'Siden er åpnet uten HTTPS. Høydedata og GPS kan bli blokkert av nettleseren. Last filen opp på et HTTPS-webhotell.';
+  return '';
+}
+
+// HTTPS-first elevation providers. Kartverket is attempted first. A second public HTTPS
+// elevation endpoint is used as fallback so the app can still calculate when a browser
+// rejects one provider due to CORS or endpoint changes.
+async function fetchJson(url, timeout=9000){
+  const c=new AbortController(), id=setTimeout(()=>c.abort(),timeout);
+  try{const r=await fetch(url,{mode:'cors',signal:c.signal,cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json();}
+  finally{clearTimeout(id)}
+}
+function extractElevation(j){
+  const vals=[
+    j?.hoyde,j?.høyde,j?.elevation,j?.z,j?.punkt?.hoyde,j?.punkt?.høyde,j?.punkt?.elevation,
+    j?.data?.hoyde,j?.data?.elevation,j?.results?.[0]?.elevation
+  ];
+  if(Array.isArray(j)&&j.length) vals.push(j[0]?.hoyde,j[0]?.høyde,j[0]?.elevation,j[0]?.z);
+  const v=vals.find(x=>Number.isFinite(Number(x))); if(v===undefined)throw new Error('ukjent svarformat'); return Number(v);
+}
+async function elevationAt(lat,lon){
+  const attempts=[
+    // Kartverket/Geonorge HTTPS REST variants (API deployments have changed over time).
+    `https://ws.geonorge.no/hoydedata/v1/punkt?koordsys=4326&nord=${encodeURIComponent(lat)}&ost=${encodeURIComponent(lon)}`,
+    `https://ws.geonorge.no/hoydedata/v1/punkt?koordsys=4258&nord=${encodeURIComponent(lat)}&ost=${encodeURIComponent(lon)}`,
+    // HTTPS fallback: Open-Meteo elevation API.
+    `https://api.open-meteo.com/v1/elevation?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`
+  ];
+  let errors=[];
+  for(const u of attempts){
+    try{return extractElevation(await fetchJson(u));}
+    catch(e){errors.push(e.message)}
+  }
+  throw new Error(errors.join(' / '));
+}
+async function terrainHorizonForAzimuth(az,maxKm=20){
+  const obs=await elevationAt(pt.lat,pt.lng);
+  let best={angle:-90,distance:0,elev:obs};
+  let ds=[];
+  for(let k=.15;k<=2;k+=.15)ds.push(k);
+  for(let k=2.3;k<=5;k+=.3)ds.push(k);
+  for(let k=5.6;k<=maxKm;k+=.6)ds.push(k);
+  for(const km of ds){
+    const q=dest(pt,az,km), h=await elevationAt(q.lat,q.lng);
+    const curvature=(km*1000)*(km*1000)/(2*6371000);
+    const angle=Math.atan2(h-obs-curvature,km*1000)*D;
+    if(angle>best.angle)best={angle,distance:km,elev:h};
+  }
+  return {obs,...best};
+}
+async function calculateTerrainClearance(){
+  const status=document.getElementById('terrainStatus'), out=document.getElementById('terrainResult');
+  const sec=secureContextMessage();
+  if(sec){status.textContent='⚠ '+sec;out.textContent='';return;}
+  status.textContent='Henter høydedata via HTTPS …'; out.textContent='';
+  try{
+    const base=dt(); let cache={},found=null;
+    // 10-minute scan, 2-degree azimuth buckets to keep network load reasonable.
+    for(let min=0;min<=1080;min+=10){
+      const t=new Date(base.getTime()+min*60000),m=moonPosition(t,pt.lat,pt.lng);
+      if(m.alt<=-1)continue;
+      const bucket=Math.round(m.az/2)*2;
+      if(!cache[bucket])cache[bucket]=await terrainHorizonForAzimuth(bucket,20);
+      const h=cache[bucket];
+      if(m.alt>h.angle){found={t,m,h};break;}
+    }
+    status.textContent='✓ Høydedata mottatt';
+    if(found){
+      const {t,m,h}=found;
+      out.innerHTML=`Månen går klar av terrenget ca. <b>${fmt(t)}</b> · azimut ${m.az.toFixed(1)}° · høydevinkel ${m.alt.toFixed(1)}°<br>Terrenghorisont ${h.angle.toFixed(1)}° · høyeste blokkering ca. ${h.distance.toFixed(1)} km unna (${Math.round(h.elev)} moh.)`;
+    }else out.textContent='Fant ikke terrengklaring innen 18 timer fra valgt tidspunkt.';
+  }catch(e){
+    status.textContent='⚠ Høydedata kunne ikke hentes';
+    out.textContent='Sjekk at MoonMap åpnes fra HTTPS (eller localhost). Nettleseren/API-et kan også blokkere CORS. Feil: '+e.message;
+  }
+}
+document.getElementById('terrainCalc').onclick=calculateTerrainClearance;
+const msg=secureContextMessage(); if(msg)document.getElementById('terrainStatus').textContent='⚠ '+msg;
+</script></body></html>
