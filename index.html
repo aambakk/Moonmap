@@ -243,7 +243,7 @@ async function loadWeather(){
 }
 document.getElementById('weatherRefresh').onclick=loadWeather;
 setTimeout(loadWeather,300);
-document.querySelectorAll('#weatherBox .panel-toggle').forEach(b=>b.addEventListener('click',()=>{const el=document.getElementById(b.dataset.target);const c=el.classList.toggle('is-collapsed');b.textContent=c?'+':'−';}));
+
 </script><script id="v33-behavior">
 (function(){
  function collapse(id){
@@ -256,6 +256,22 @@ document.querySelectorAll('#weatherBox .panel-toggle').forEach(b=>b.addEventList
  // Reflow Leaflet after every panel toggle.
  document.addEventListener('click',e=>{
    if(e.target.classList.contains('panel-toggle')) setTimeout(()=>map.invalidateSize(),30);
+ });
+})();
+</script><script id="v34-weather-toggle-fix">
+(function(){
+ const wb=document.querySelector('#weatherBox .panel-toggle');
+ if(!wb)return;
+ // Replace the button with a clone to remove all previously registered click listeners.
+ const nb=wb.cloneNode(true);
+ wb.replaceWith(nb);
+ nb.addEventListener('click',function(e){
+   e.preventDefault(); e.stopPropagation();
+   const el=document.getElementById('weatherBox');
+   const c=el.classList.toggle('is-collapsed');
+   this.textContent=c?'+':'−';
+   this.setAttribute('aria-label',c?'Utvid vær':'Minimer vær');
+   setTimeout(()=>{try{map.invalidateSize()}catch(_){}},30);
  });
 })();
 </script></body></html>
