@@ -27,10 +27,32 @@
   #controls{transition:none}
 }
 </style>
-</head><body>
+<style>
+#terrainBox.is-collapsed{left:auto!important;right:10px!important;top:150px!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important;border:0!important}
+#terrainBox.is-collapsed .terrainHead{display:block!important;background:transparent!important;padding:0!important}
+#terrainBox.is-collapsed .terrainHead b,#terrainBox.is-collapsed #terrainCalc,#terrainBox.is-collapsed #terrainStatus,#terrainBox.is-collapsed #terrainResult{display:none!important}
+#terrainBox.is-collapsed .panel-toggle,#controls.is-collapsed .panel-toggle{width:42px!important;height:42px!important;padding:0!important;border-radius:50%!important;background:#26343d!important;box-shadow:0 2px 8px #0007!important}
+#controls.is-collapsed{left:auto!important;right:10px!important;bottom:10px!important;top:auto!important;width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important;border:0!important}
+#controls.is-collapsed .collapse-row{padding:0!important;margin:0!important}
+#controls.is-collapsed .collapsible-body{display:none!important}
+</style><style>
+#weatherBox{position:absolute;z-index:500;left:12px;right:12px;top:142px;background:#101418e8;border-radius:14px;padding:9px 10px;font-size:12px;box-shadow:0 3px 15px #0006}
+#terrainBox{top:230px!important}
+.weatherHead{display:flex;justify-content:space-between;align-items:center}.weatherHead button{padding:5px 9px}
+#weatherStatus{color:#aeb8be;margin-top:4px}#weatherData{margin-top:5px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.wx{background:#263139cc;border-radius:8px;padding:5px;text-align:center}.wx b{display:block;font-size:15px}.wx small{color:#aeb8be}
+#weatherBox.is-collapsed{left:auto!important;right:60px!important;top:150px!important;width:auto!important;min-width:0!important;padding:0!important;margin:0!important;background:transparent!important;box-shadow:none!important;border:0!important}
+#weatherBox.is-collapsed .weatherHead{display:block!important}.weatherHead b{display:inline}
+#weatherBox.is-collapsed .weatherHead b,#weatherBox.is-collapsed #weatherRefresh,#weatherBox.is-collapsed .collapsible-body{display:none!important}
+#weatherBox.is-collapsed .panel-toggle{width:42px!important;height:42px!important;padding:0!important;border-radius:50%!important;background:#26343d!important;box-shadow:0 2px 8px #0007!important}
+@media(min-width:800px){#weatherBox{right:auto;width:520px}}
+</style></head><body>
 <div id="map"></div><header><div><b>MoonMap</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
 <section id="info"><span>🌙</span><div><small>AZIMUT</small><b id="az">–</b></div><div><small>HØYDE</small><b id="alt">–</b></div><div><small>LYS</small><b id="ill">–</b></div><div><small>OPP / NED</small><b id="rs">–</b></div></section>
-<section id="terrainBox">
+<section id="weatherBox">
+<div class="weatherHead"><b>🌦 Vær ved observasjonspunkt</b><span><button id="weatherRefresh">↻</button> <button class="panel-toggle" data-target="weatherBox" aria-label="Minimer">−</button></span></div>
+<div class="collapsible-body"><div id="weatherStatus">Henter værdata …</div><div id="weatherData"></div></div>
+</section><section id="terrainBox">
       <div class="terrainHead"><b>⛰ Terrenghorisont</b><span><button id="terrainCalc">Beregn</button> <button class="panel-toggle" data-target="terrainBox" aria-label="Minimer">−</button></span></div>
       <div id="terrainStatus">Bruk HTTPS for høydedata.</div>
       <div id="terrainResult"></div>
@@ -61,8 +83,8 @@ update=function(){
   const bounds=map.getBounds();
   const ne=bounds.getNorthEast(), sw=bounds.getSouthWest();
   const mapKm=Math.max(1,map.distance(sw,ne)/1000);
-  const end=dest(pt,m.az,mapKm*0.34);
-  if(ray)ray.setLatLngs([[pt.lat,pt.lng],[end.lat,end.lng]]);
+  const end=dest(pt,m.az,mapKm*0.20);
+  if(ray){ray.setLatLngs([[pt.lat,pt.lng],[end.lat,end.lng]]);ray.setStyle({weight:2});}
   if(moonEndMarker)moonEndMarker.remove();
   const icon=L.divIcon({className:'moon-end-icon',html:'<div class="disc"></div>',iconSize:[28,28],iconAnchor:[14,14]});
   moonEndMarker=L.marker([end.lat,end.lng],{icon,interactive:false,zIndexOffset:900}).addTo(map);
@@ -142,4 +164,36 @@ document.querySelectorAll('.panel-toggle').forEach(b=>{
     setTimeout(()=>map.invalidateSize(),20);
   });
 });
+</script><script>
+function compass(d){return ['N','NØ','Ø','SØ','S','SV','V','NV'][Math.round(((d%360)+360)%360/45)%8]}
+function weatherText(c){if(c===0)return'Klart';if(c<=3)return'Delvis skyet';if(c===45||c===48)return'Tåke';if(c>=51&&c<=67)return'Regn';if(c>=71&&c<=77)return'Snø';if(c>=80&&c<=82)return'Byger';if(c>=95)return'Torden';return'Vær'}
+async function loadWeather(){
+ const st=document.getElementById('weatherStatus'),box=document.getElementById('weatherData');
+ st.textContent='Henter værdata …';box.innerHTML='';
+ try{
+   const url=`https://api.open-meteo.com/v1/forecast?latitude=${pt.lat}&longitude=${pt.lng}&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&wind_speed_unit=ms&timezone=auto&forecast_days=7`;
+   const j=await fetchJson(url);
+   const target=dt().getTime();
+   let i=0,best=Infinity;
+   j.hourly.time.forEach((x,n)=>{let q=Math.abs(new Date(x).getTime()-target);if(q<best){best=q;i=n}});
+   const h=j.hourly;
+   if(best>4*3600000){st.textContent='Valgt tidspunkt er utenfor værvarselet';return}
+   st.textContent=`${weatherText(h.weather_code[i])} · prognose nær valgt tidspunkt`;
+   const vis=h.visibility[i]/1000;
+   box.innerHTML=[
+    ['☁️',h.cloud_cover[i]+'%','Skydekke'],
+    ['🌧',h.precipitation_probability[i]+'%','Nedbørssjanse'],
+    ['💧',h.precipitation[i].toFixed(1)+' mm','Nedbør'],
+    ['🌡',h.temperature_2m[i].toFixed(1)+'°','Temperatur'],
+    ['💨',h.wind_speed_10m[i].toFixed(1)+' m/s','Vind '+compass(h.wind_direction_10m[i])],
+    ['↯',h.wind_gusts_10m[i].toFixed(1)+' m/s','Vindkast'],
+    ['👁',vis.toFixed(1)+' km','Sikt'],
+    ['☁',h.cloud_cover_low[i]+'%','Lave skyer'],
+    ['☾',h.cloud_cover_high[i]+'%','Høye skyer']
+   ].map(x=>`<div class="wx">${x[0]} <b>${x[1]}</b><small>${x[2]}</small></div>`).join('');
+ }catch(e){st.textContent='⚠ Kunne ikke hente værdata';box.innerHTML=''}
+}
+document.getElementById('weatherRefresh').onclick=loadWeather;
+setTimeout(loadWeather,300);
+document.querySelectorAll('#weatherBox .panel-toggle').forEach(b=>b.addEventListener('click',()=>{const el=document.getElementById(b.dataset.target);const c=el.classList.toggle('is-collapsed');b.textContent=c?'+':'−';}));
 </script></body></html>
