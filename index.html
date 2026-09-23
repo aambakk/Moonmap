@@ -1,4 +1,4 @@
-<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101418"><title>MoonMap</title>
+<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101418"><title>Jon`s måneside</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>*{box-sizing:border-box}html,body{height:100%;margin:0;background:#101418;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}#map{position:absolute;inset:0 0 215px}.leaflet-control-attribution{font-size:9px}header{position:absolute;z-index:500;top:12px;left:55px;right:12px;background:#101418e8;border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 15px #0008}header b{font-size:19px}header small{display:block;color:#aeb8be}button{border:0;border-radius:9px;padding:9px 10px;background:#29343b;color:#fff;font-weight:700}#info{position:absolute;z-index:500;top:79px;left:12px;right:12px;background:#101418e8;border-radius:14px;padding:9px;display:grid;grid-template-columns:45px repeat(4,1fr);text-align:center;align-items:center}#info>span{font-size:28px}#info small{display:block;font-size:9px;color:#9faab1}#info b{font-size:13px}#controls{position:absolute;z-index:500;bottom:0;left:0;right:0;min-height:215px;background:#101418f7;padding:12px 14px max(12px,env(safe-area-inset-bottom));box-shadow:0 -3px 15px #0008}.dates{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dates input{background:#222d34;color:#fff;border:1px solid #46525a;border-radius:8px;padding:7px;color-scheme:dark}#slider{width:100%;margin-top:12px}.labels{display:flex;justify-content:space-between;font-size:11px;color:#abb6bc}.labels b{color:#fff}.buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}.buttons button{font-size:11px;padding:9px 2px}label{font-size:12px;color:#c5ced3}@media(min-width:800px){#map{inset:0}#controls{left:auto;right:12px;bottom:12px;width:430px;border-radius:15px}#info{right:auto;width:520px}}</style>
 <style>
 #terrainBox{position:absolute;z-index:500;left:12px;right:12px;top:142px;background:#101418e8;border-radius:14px;padding:9px 10px;font-size:12px;box-shadow:0 3px 15px #0006}
@@ -94,11 +94,109 @@
  #weatherBox:not(.is-collapsed){max-height:39vh}
  #terrainBox:not(.is-collapsed){bottom:205px!important}
 }
+</style><style id='v35-weather-css'>#weatherData{grid-template-columns:repeat(3,1fr)!important}</style><style id="v36-labels">
+#weatherBox.is-collapsed{width:58px!important;min-width:58px!important;max-width:58px!important}
+#terrainBox.is-collapsed{width:66px!important;min-width:66px!important;max-width:66px!important}
+#controls.is-collapsed{width:70px!important;min-width:70px!important;max-width:70px!important}
+#weatherBox.is-collapsed .panel-toggle,#terrainBox.is-collapsed .panel-toggle,#controls.is-collapsed .panel-toggle{
+ width:auto!important;min-width:100%!important;height:38px!important;min-height:38px!important;
+ border-radius:12px!important;padding:0 8px!important;font-size:12px!important;font-weight:700!important;
+ line-height:38px!important;white-space:nowrap!important
+}
+#weatherBox.is-collapsed{right:154px!important}
+#terrainBox.is-collapsed{right:80px!important}
+#controls.is-collapsed{right:4px!important}
+</style><style id="v37-moonlight">
+.moonlight-good{color:#dfffb8}.moonlight-bad{color:#ffd0a8}
+#terrainResult b{font-size:14px}
+</style><style id="v38-layers">
+#layerSwitch{position:absolute;z-index:900;top:92px;right:12px;background:#111a;border-radius:11px;padding:3px;box-shadow:0 2px 8px #0007;display:flex;gap:2px}
+#layerSwitch button{border:0;border-radius:8px;padding:7px 10px;background:#26343d;color:#dce4e8;font-weight:700}
+#layerSwitch button.active{background:#e9eef0;color:#172027}
+@media(max-width:700px){#layerSwitch{top:92px;right:12px}}
+</style>
+<style id="refined-ui">
+:root{color-scheme:dark;--surface:rgba(18,27,37,.94);--edge:rgba(205,225,239,.17);--muted:#b5c7d1;--accent:#e7c986}
+html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button{cursor:pointer;min-height:42px;border:1px solid var(--edge);border-radius:11px;background:linear-gradient(180deg,#334859,#263743);color:#f4f8f9;font-size:14px;font-weight:650;letter-spacing:.01em;box-shadow:0 2px 5px #0003;transition:background .18s,transform .18s,border-color .18s,box-shadow .18s}
+button:hover{background:#405a6b;border-color:#a3bbc9;box-shadow:0 4px 12px #0005}
+button:active{transform:translateY(1px);background:#1e3444}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header,#info,#weatherBox,#terrainBox,#controls{background:var(--surface)!important;border:1px solid var(--edge);box-shadow:0 12px 34px #0008;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+header{padding:12px 16px;border-radius:16px}
+header b{font-size:19px;letter-spacing:.015em}
+header small{font-size:12px;color:var(--muted);margin-top:2px}
+header #loc{width:44px;height:44px;font-size:24px;line-height:1;padding:0;color:var(--accent)}
+#info{padding:13px 12px;border-radius:16px;gap:5px}
+#info small{font-size:11px;letter-spacing:.08em;color:var(--muted);margin-bottom:3px}
+#info b{font-size:15px;font-variant-numeric:tabular-nums}
+#weatherBox,#terrainBox{padding:13px 15px;border-radius:16px;font-size:14px}
+.weatherHead,.terrainHead{gap:12px;min-height:42px}
+.weatherHead b,.terrainHead b{font-size:15px}
+.weatherHead span,.terrainHead span{display:flex;align-items:center;gap:7px}
+.weatherHead button,.terrainHead button{min-height:38px;padding:7px 12px}
+#weatherStatus,#terrainStatus,#weatherData,#terrainResult{line-height:1.5}
+.wx{padding:10px 6px;border:1px solid #ffffff15;border-radius:11px;background:#34455288}
+.wx b{font-size:16px}
+#controls{padding:14px 18px max(16px,env(safe-area-inset-bottom));border-radius:18px}
+#controls .collapse-row{margin-bottom:8px}
+.panel-toggle{min-width:38px;min-height:38px;border-radius:10px;font-size:19px}
+.dates{gap:10px}
+.dates input{width:100%;min-height:46px;padding:9px 12px;background:#20313f;border:1px solid #648094;border-radius:11px;font-size:15px}
+#slider{height:24px;accent-color:var(--accent);cursor:pointer;margin-top:15px}
+.labels{font-size:12px;color:var(--muted)}
+.labels b{font-size:14px;color:var(--accent)}
+.buttons{gap:7px;margin:14px 0}
+.buttons button{min-height:44px;padding:8px 4px;font-size:13px}
+.buttons #now{background:linear-gradient(180deg,#f0d89b,#cfaa63);color:#152430;border-color:#f2dea9;font-weight:800}
+.buttons #now:hover{background:#f8dfa1}
+#controls label{display:flex;align-items:center;gap:8px;font-size:14px;line-height:1.35;color:#d8e3e9}
+#controls label input{width:18px;height:18px;accent-color:var(--accent)}
+#layerSwitch{padding:4px;gap:3px;background:var(--surface);border:1px solid var(--edge);border-radius:13px;backdrop-filter:blur(14px)}
+#layerSwitch button{min-height:38px;padding:7px 13px;background:transparent;border:0;box-shadow:none;color:#d1dee5}
+#layerSwitch button.active{background:#e9d29a;color:#192936;box-shadow:0 2px 8px #0005}
+#weatherBox.is-collapsed .panel-toggle,#terrainBox.is-collapsed .panel-toggle,#controls.is-collapsed .panel-toggle{background:#263d4c!important;border:1px solid #8aa2b4!important;box-shadow:0 4px 14px #0008!important;font-size:13px!important}
+@media(max-width:700px){
+ header{left:54px;right:10px;top:9px;padding:9px 11px}
+ header b{font-size:16px}header small{font-size:11px}
+ #info{top:76px;left:10px;right:10px;grid-template-columns:30px repeat(4,minmax(0,1fr));padding:10px 6px}
+ #info>span{font-size:21px}#info small{font-size:9px;letter-spacing:0}#info b{font-size:12px}
+ #layerSwitch{top:145px;right:10px}
+ #weatherBox:not(.is-collapsed){top:195px!important;left:10px!important;right:10px!important}
+ #terrainBox:not(.is-collapsed){left:10px!important;right:10px!important;bottom:235px!important}
+ #controls:not(.is-collapsed){padding:10px 12px max(12px,env(safe-area-inset-bottom))}
+ .buttons{gap:5px;margin:10px 0}.buttons button{font-size:12px}
+}
+@media(max-width:390px){.buttons button{font-size:11px;padding:7px 2px}#info b{font-size:11px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+#terrainBox:not(.is-collapsed){bottom:calc(var(--time-panel-height, 235px) + 14px)!important;max-height:min(38vh,420px);overflow:auto}
+#weatherBox:not(.is-collapsed){max-height:min(35vh,360px);overflow:auto}
+#weatherBox.is-collapsed,#terrainBox.is-collapsed,#controls.is-collapsed{width:auto!important;min-width:0!important;max-width:none!important;height:46px!important;min-height:46px!important;max-height:46px!important}
+#weatherBox.is-collapsed{right:210px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
+#terrainBox.is-collapsed{right:109px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
+#controls.is-collapsed{right:10px!important;bottom:calc(12px + env(safe-area-inset-bottom))!important}
+#weatherBox.is-collapsed .panel-toggle,#terrainBox.is-collapsed .panel-toggle,#controls.is-collapsed .panel-toggle{
+ display:flex!important;align-items:center;justify-content:center;gap:6px;
+ width:auto!important;min-width:0!important;height:46px!important;min-height:46px!important;
+ padding:0 12px!important;border-radius:13px!important;line-height:1!important;
+ background:#203442!important;border:1px solid #728fa2!important;color:#f2f6f7!important;
+ box-shadow:0 6px 18px #0009!important;font-size:13px!important
+}
+.panel-toggle svg{width:17px;height:17px;flex:none;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#weatherBox.is-collapsed .panel-toggle::before{content:"☁";font-size:19px;font-weight:400}
+#terrainBox.is-collapsed .panel-toggle::before{content:"△";font-size:20px;font-weight:600}
+#controls.is-collapsed .panel-toggle::before{content:"◷";font-size:20px;font-weight:400}
+@media(max-width:390px){
+ #weatherBox.is-collapsed{right:184px!important}
+ #terrainBox.is-collapsed{right:95px!important}
+ #weatherBox.is-collapsed .panel-toggle,#terrainBox.is-collapsed .panel-toggle,#controls.is-collapsed .panel-toggle{padding:0 9px!important;font-size:12px!important;gap:4px}
+}
 </style></head><body>
-<div id="map"></div><header><div><b>MoonMap</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
+<div id="map"></div><div id="layerSwitch"><button id="btnMap" class="active">Kart</button><button id="btnPhoto">Flyfoto</button></div><header><div><b>Jon`s måneside</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
 <section id="info"><span>🌙</span><div><small>AZIMUT</small><b id="az">–</b></div><div><small>HØYDE</small><b id="alt">–</b></div><div><small>LYS</small><b id="ill">–</b></div><div><small>OPP / NED</small><b id="rs">–</b></div></section>
 <section id="weatherBox">
-<div class="weatherHead"><b>🌦 Vær ved observasjonspunkt</b><span><button id="weatherRefresh">↻</button> <button class="panel-toggle" data-target="weatherBox" aria-label="Minimer">−</button></span></div>
+<div class="weatherHead"><b>🌦 Vær · MET Norge</b><span><button id="weatherRefresh">↻</button> <button class="panel-toggle" data-target="weatherBox" aria-label="Minimer">−</button></span></div>
 <div class="collapsible-body"><div id="weatherStatus">Henter værdata …</div><div id="weatherData"></div></div>
 </section><section id="terrainBox">
       <div class="terrainHead"><b>⛰ Terrenghorisont</b><span><button id="terrainCalc">Beregn</button> <button class="panel-toggle" data-target="terrainBox" aria-label="Minimer">−</button></span></div>
@@ -131,10 +229,21 @@ update=function(){
   const bounds=map.getBounds();
   const ne=bounds.getNorthEast(), sw=bounds.getSouthWest();
   const mapKm=Math.max(1,map.distance(sw,ne)/1000);
-  const end=dest(pt,m.az,mapKm*0.20);
-  if(ray){ray.setLatLngs([[pt.lat,pt.lng],[end.lat,end.lng]]);ray.setStyle({weight:2});}
+  const end=dest(pt,m.az,mapKm*0.075);
+  if(ray){ray.setLatLngs([[pt.lat,pt.lng],[end.lat,end.lng]]);ray.setStyle({weight:1.5,opacity:.48,dashArray:'3,7',color:'#f8e9ae'});}
   if(moonEndMarker)moonEndMarker.remove();
-  const icon=L.divIcon({className:'moon-end-icon',html:'<div class="disc"></div>',iconSize:[28,28],iconAnchor:[14,14]});
+  const phase=n((eq(t).lon-sl(t))*D)/360;
+  const illum=Math.max(0,Math.min(1,m.illum));
+  const waxing=phase<.5;
+  const rim=[]; const terminator=[];
+  for(let y=0;y<=24;y+=.5){
+    const half=Math.sqrt(Math.max(0,144-(y-12)**2));
+    rim.push(`${(12+(waxing?half:-half)).toFixed(2)},${y.toFixed(2)}`);
+    terminator.push(`${(12+(waxing?1:-1)*(1-2*illum)*half).toFixed(2)},${y.toFixed(2)}`);
+  }
+  const lit=`M ${rim.join(' L ')} L ${terminator.reverse().join(' L ')} Z`;
+  const svg=`<svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#30333b"/><path d="${lit}" fill="#f7edc5"/><circle cx="12" cy="12" r="11.5" fill="none" stroke="#e6d9a3" stroke-opacity=".45"/></svg>`;
+  const icon=L.divIcon({className:'moon-end-icon',html:svg,iconSize:[28,28],iconAnchor:[14,14]});
   moonEndMarker=L.marker([end.lat,end.lng],{icon,interactive:false,zIndexOffset:900}).addTo(map);
 };
 map.on('zoomend moveend',()=>update());
@@ -156,13 +265,18 @@ async function fetchJson(url, timeout=12000){
   finally{clearTimeout(id)}
 }
 async function elevationsBatch(points){
-  const lat=points.map(p=>p.lat.toFixed(6)).join(',');
-  const lon=points.map(p=>p.lng.toFixed(6)).join(',');
-  const j=await fetchJson(`https://api.open-meteo.com/v1/elevation?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`);
-  let a=j.elevation;
-  if(!Array.isArray(a)) a=[a];
-  if(a.length!==points.length || a.some(v=>!Number.isFinite(Number(v)))) throw new Error('Ugyldig høydesvar');
-  return a.map(Number);
+  const elevations=[];
+  for(let start=0;start<points.length;start+=90){
+    const batch=points.slice(start,start+90);
+    const lat=batch.map(p=>p.lat.toFixed(6)).join(',');
+    const lon=batch.map(p=>p.lng.toFixed(6)).join(',');
+    const j=await fetchJson(`https://api.open-meteo.com/v1/elevation?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}`,18000);
+    const values=j.elevation;
+    if(!Array.isArray(values)||values.length!==batch.length||values.some(v=>!Number.isFinite(Number(v))))
+      throw new Error(j.reason||'Ugyldig høydesvar');
+    elevations.push(...values.map(Number));
+  }
+  return elevations;
 }
 async function terrainHorizonForAzimuth(az,maxKm=20){
   let ds=[];
@@ -249,7 +363,7 @@ setTimeout(loadWeather,300);
  function collapse(id){
    const el=document.getElementById(id); if(!el || el.classList.contains('is-collapsed')) return;
    el.classList.add('is-collapsed');
-   const b=el.querySelector('.panel-toggle'); if(b){b.textContent='+';b.setAttribute('aria-label','Utvid')}
+   const b=el.querySelector('.panel-toggle'); if(b){b.textContent=({weatherBox:'Vær',terrainBox:'Terreng',controls:'Bytt tid'})[id]||'Åpne';b.setAttribute('aria-label','Åpne '+b.textContent)}
  }
  document.getElementById('terrainCalc')?.addEventListener('click',()=>collapse('weatherBox'));
  document.getElementById('weatherRefresh')?.addEventListener('click',()=>collapse('terrainBox'));
@@ -273,5 +387,194 @@ setTimeout(loadWeather,300);
    this.setAttribute('aria-label',c?'Utvid vær':'Minimer vær');
    setTimeout(()=>{try{map.invalidateSize()}catch(_){}},30);
  });
+})();
+</script><script id="v35-met-weather">
+(function(){
+ function dir(d){return ['N','NØ','Ø','SØ','S','SV','V','NV'][Math.round((((d||0)%360)+360)%360/45)%8]}
+ async function metWeather(){
+  const st=document.getElementById('weatherStatus'),box=document.getElementById('weatherData');
+  st.textContent='Henter prognose fra MET Norge …';box.innerHTML='';
+  try{
+   const lat=Number(pt.lat).toFixed(4),lon=Number(pt.lng).toFixed(4);
+   const r=await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`,{mode:'cors'});
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   const j=await r.json(),target=dt().getTime();let row=null,best=Infinity;
+   j.properties.timeseries.forEach(x=>{const q=Math.abs(new Date(x.time).getTime()-target);if(q<best){best=q;row=x}});
+   if(!row||best>6*3600000){st.textContent='Valgt tidspunkt er utenfor MET-prognosen';return}
+   const d=row.data.instant.details,p=row.data.next_1_hours||row.data.next_6_hours||row.data.next_12_hours||{},pd=p.details||{};
+   const temp=d.air_temperature,wind=d.wind_speed,wd=d.wind_from_direction,rain=pd.precipitation_amount;
+   st.textContent='Prognose nær valgt tidspunkt · MET Norge';
+   box.innerHTML=[
+    ['🌡',Number.isFinite(temp)?temp.toFixed(1)+' °C':'–','Temperatur'],
+    ['🌧',Number.isFinite(rain)?rain.toFixed(1)+' mm':'–','Nedbør'],
+    ['💨',Number.isFinite(wind)?wind.toFixed(1)+' m/s':'–',`Vind ${dir(wd)}${Number.isFinite(wd)?' · '+Math.round(wd)+'°':''}`]
+   ].map(x=>`<div class="wx">${x[0]} <b>${x[1]}</b><small>${x[2]}</small></div>`).join('');
+  }catch(e){
+   try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${pt.lat.toFixed(4)}&longitude=${pt.lng.toFixed(4)}&hourly=temperature_2m,precipitation,wind_speed_10m&wind_speed_unit=ms&timezone=auto`;
+    const fallback=await fetchJson(url,18000),hours=fallback.hourly;
+    const target=dt().getTime();
+    let index=-1,best=Infinity;
+    hours.time.forEach((time,i)=>{const delta=Math.abs(new Date(time).getTime()-target);if(delta<best){best=delta;index=i}});
+    if(index<0||best>6*3600000)throw new Error('Valgt tidspunkt er utenfor prognosen');
+    st.textContent='Prognose nær valgt tidspunkt · Open-Meteo';
+    box.innerHTML=[
+      ['🌡',hours.temperature_2m[index].toFixed(1)+' °C','Temperatur'],
+      ['🌧',hours.precipitation[index].toFixed(1)+' mm','Nedbør'],
+      ['💨',hours.wind_speed_10m[index].toFixed(1)+' m/s','Vind']
+    ].map(x=>`<div class="wx">${x[0]} <b>${x[1]}</b><small>${x[2]}</small></div>`).join('');
+   }catch(fallbackError){st.textContent='⚠ Værdata utilgjengelige akkurat nå. Prøv igjen om litt.';box.innerHTML=''}
+  }
+ }
+ window.loadWeather=metWeather;
+ const b=document.getElementById('weatherRefresh');if(b)b.onclick=metWeather;
+ setTimeout(metWeather,500);
+})();
+</script><script id="v36-collapse-labels">
+(function(){
+ const labels={weatherBox:'Vær',terrainBox:'Terreng',controls:'Bytt tid'};
+ document.addEventListener('click',function(e){
+  const b=e.target.closest('.panel-toggle'); if(!b)return;
+  setTimeout(function(){
+   const id=b.dataset.target,el=document.getElementById(id);
+   if(!el||!labels[id])return;
+   if(el.classList.contains('is-collapsed')){
+    b.textContent=labels[id]; b.setAttribute('aria-label','Åpne '+labels[id]);
+   }else{
+    b.textContent='−'; b.setAttribute('aria-label','Minimer '+labels[id]);
+   }
+  },0);
+ },true);
+})();
+</script><script id="v37-direct-moonlight">
+(function(){
+ const Rearth=6371000, rad=Math.PI/180;
+ function destinationLocal(origin,bearing,km){
+   const d=km*1000/Rearth,b=bearing*rad,lat1=origin.lat*rad,lon1=origin.lng*rad;
+   const lat2=Math.asin(Math.sin(lat1)*Math.cos(d)+Math.cos(lat1)*Math.sin(d)*Math.cos(b));
+   const lon2=lon1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(lat1),Math.cos(d)-Math.sin(lat1)*Math.sin(lat2));
+   return {lat:lat2/rad,lng:lon2/rad};
+ }
+ async function profileForAzimuth(az,maxKm=35){
+   // Dense near the selected hunting area; progressively coarser farther away.
+   const ds=[];
+   for(let k=.05;k<=1;k+=.05)ds.push(k);
+   for(let k=1.1;k<=3;k+=.10)ds.push(k);
+   for(let k=3.2;k<=8;k+=.20)ds.push(k);
+   for(let k=8.5;k<=15;k+=.50)ds.push(k);
+   for(let k=16;k<=35;k+=1)ds.push(k);
+   const pts=[{lat:pt.lat,lng:pt.lng},...ds.map(k=>destinationLocal(pt,az,k))];
+   const hs=await elevationsBatch(pts),obs=hs[0];
+   let best={angle:-90,distance:0,elev:obs};
+   ds.forEach((km,i)=>{
+     const dist=km*1000,h=hs[i+1];
+     // Apparent terrain angle from selected ground point, including Earth curvature.
+     const drop=dist*dist/(2*Rearth);
+     const a=Math.atan2(h-obs-drop,dist)/rad;
+     if(a>best.angle)best={angle:a,distance:km,elev:h};
+   });
+   return {obs,...best};
+ }
+ async function directAt(t){
+   const m=moonPosition(t,pt.lat,pt.lng);
+   if(m.alt<=0)return {lit:false,m,h:null,clearance:m.alt};
+   const h=await profileForAzimuth(m.az,35);
+   return {lit:m.alt>h.angle,m,h,clearance:m.alt-h.angle};
+ }
+ function hm(t){return t.toLocaleTimeString('nb-NO',{hour:'2-digit',minute:'2-digit'})}
+ async function calc(){
+   const status=document.getElementById('terrainStatus'),out=document.getElementById('terrainResult');
+   const button=document.getElementById('terrainCalc');
+   if(button.disabled)return;
+   button.disabled=true;button.textContent='Beregner …';
+   status.textContent='Beregner direkte måneskinn mot terrenget …';out.innerHTML='';
+   try{
+     const base=dt(), step=20, horizon=18*60;
+     let first=null,last=null,prev=false,firstDark=null,representative=null;
+     // Cache horizon by 1-degree azimuth bucket; terrain does not change with time.
+     const cache=new Map();
+     async function state(t){
+       const m=moonPosition(t,pt.lat,pt.lng);
+       if(m.alt<=0)return {lit:false,m,h:null,clearance:m.alt};
+       const key=Math.round(m.az);
+       let h=cache.get(key);
+       if(!h){h=await profileForAzimuth(m.az,35);cache.set(key,h)}
+       return {lit:m.alt>h.angle,m,h,clearance:m.alt-h.angle};
+     }
+     for(let min=0;min<=horizon;min+=step){
+       if(min%60===0)status.textContent='Beregner terrenghorisont · '+Math.round(min/60)+' av 18 timer …';
+       const t=new Date(base.getTime()+min*60000),x=await state(t);
+       if(x.lit&&!prev&&!first){first={t,x};representative=x}
+       if(x.lit)last={t,x};
+       if(!x.lit&&prev&&first&&!firstDark){firstDark={t,x};break}
+       prev=x.lit;
+     }
+     // Refine first crossing to ~1 minute.
+     if(first){
+       let lo=new Date(first.t.getTime()-step*60000),hi=first.t;
+       for(let z=0;z<4;z++){
+         const mid=new Date((lo.getTime()+hi.getTime())/2),x=await state(mid);
+         if(x.lit){hi=mid;representative=x}else lo=mid;
+       }
+       first.t=hi;first.x=representative;
+     }
+     status.textContent='✓ Terrengprofil beregnet for valgt punkt';
+     if(!first){
+       out.innerHTML='<span class="moonlight-bad"><b>🌙 Ingen direkte månebelysning funnet de neste 18 timene.</b></span>';
+       return;
+     }
+     const x=first.x,h=x.h,m=x.m;
+     let until=firstDark?hm(firstDark.t):(last?hm(last.t):'minst 18 t');
+     out.innerHTML=`<span class="moonlight-good"><b>🌙 Direkte måneskinn ca. ${hm(first.t)} → ${until}</b></span><br>`+
+       `Ved innslipp: måne ${m.alt.toFixed(1)}° · terrengkant ${h.angle.toFixed(1)}° · klaring ${x.clearance>=0?'+':''}${x.clearance.toFixed(1)}°<br>`+
+       `Høyeste sperrende terreng i retningen: ca. ${h.distance.toFixed(1)} km · ${Math.round(h.elev)} moh.<br>`+
+       `<small>Beregnet for valgt punkt og terreng i retning mot månen. Skyer kan fortsatt hindre måneskinn.</small>`;
+   }catch(e){
+     status.textContent='⚠ Kunne ikke beregne terrengbelysning';
+     out.textContent='Feil: '+e.message;
+   }finally{
+     button.disabled=false;button.textContent='Beregn';
+   }
+ }
+ const b=document.getElementById('terrainCalc');
+ if(b)b.onclick=calc;
+ window.calculateTerrainClearance=calc;
+})();
+</script><script id="v38-flyfoto">
+(function(){
+ let photoLayer=null;
+ const mapBtn=document.getElementById('btnMap'),photoBtn=document.getElementById('btnPhoto');
+ function ensurePhoto(){
+   if(!photoLayer) photoLayer=L.tileLayer(
+     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+     {maxZoom:19,attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}
+   );
+   return photoLayer;
+ }
+ function setMode(photo){
+   if(photo){
+     // Hide current base tile layers but keep overlays/markers.
+     map.eachLayer(l=>{if(l instanceof L.TileLayer && l!==photoLayer) map.removeLayer(l)});
+     ensurePhoto().addTo(map);
+   }else{
+     if(photoLayer)map.removeLayer(photoLayer);
+     // Restore OSM base.
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+       maxZoom:19,attribution:'© OpenStreetMap contributors'
+     }).addTo(map).bringToBack();
+   }
+   mapBtn.classList.toggle('active',!photo);photoBtn.classList.toggle('active',photo);
+ }
+ mapBtn.onclick=()=>setMode(false);photoBtn.onclick=()=>setMode(true);
+})();
+</script><script id="panel-layout-and-icons">
+(()=>{
+ const controls=document.getElementById('controls');
+ const syncHeight=()=>document.documentElement.style.setProperty('--time-panel-height',
+   (controls.classList.contains('is-collapsed')?46:controls.getBoundingClientRect().height)+'px');
+ new ResizeObserver(syncHeight).observe(controls);
+ new MutationObserver(syncHeight).observe(controls,{attributes:true,attributeFilter:['class']});
+ window.addEventListener('resize',syncHeight);
+ syncHeight();
 })();
 </script></body></html>
