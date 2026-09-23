@@ -46,6 +46,54 @@
 #weatherBox.is-collapsed .weatherHead b,#weatherBox.is-collapsed #weatherRefresh,#weatherBox.is-collapsed .collapsible-body{display:none!important}
 #weatherBox.is-collapsed .panel-toggle{width:42px!important;height:42px!important;padding:0!important;border-radius:50%!important;background:#26343d!important;box-shadow:0 2px 8px #0007!important}
 @media(min-width:800px){#weatherBox{right:auto;width:520px}}
+</style><style id="v33-layout">
+/* Map always uses the full available viewport */
+#map{height:100vh!important;bottom:0!important}
+
+/* Expanded floating cards */
+#weatherBox{top:142px!important;left:12px!important;right:12px!important;z-index:700!important;max-height:44vh;overflow:auto}
+#terrainBox{top:auto!important;left:12px!important;right:12px!important;bottom:205px!important;z-index:710!important}
+
+/* Controls float above map rather than reserving a black page area */
+#controls{position:absolute!important;left:0!important;right:0!important;bottom:0!important;z-index:720!important;height:auto!important;min-height:0!important}
+
+/* Collapsed = ONLY a compact round reopen button */
+#weatherBox.is-collapsed,#terrainBox.is-collapsed,#controls.is-collapsed{
+ left:auto!important;width:42px!important;min-width:42px!important;max-width:42px!important;
+ height:42px!important;min-height:42px!important;max-height:42px!important;
+ padding:0!important;margin:0!important;background:transparent!important;
+ border:0!important;box-shadow:none!important;overflow:visible!important;
+}
+#weatherBox.is-collapsed{right:108px!important;top:auto!important;bottom:12px!important}
+#terrainBox.is-collapsed{right:59px!important;top:auto!important;bottom:12px!important}
+#controls.is-collapsed{right:10px!important;left:auto!important;top:auto!important;bottom:12px!important}
+
+#weatherBox.is-collapsed .weatherHead,
+#terrainBox.is-collapsed .terrainHead,
+#controls.is-collapsed .collapse-row{display:block!important;padding:0!important;margin:0!important}
+#weatherBox.is-collapsed .weatherHead>b,
+#weatherBox.is-collapsed #weatherRefresh,
+#weatherBox.is-collapsed .collapsible-body,
+#terrainBox.is-collapsed .terrainHead>b,
+#terrainBox.is-collapsed #terrainCalc,
+#terrainBox.is-collapsed #terrainStatus,
+#terrainBox.is-collapsed #terrainResult,
+#controls.is-collapsed .collapsible-body{display:none!important}
+
+#weatherBox.is-collapsed .panel-toggle,
+#terrainBox.is-collapsed .panel-toggle,
+#controls.is-collapsed .panel-toggle{
+ display:block!important;width:42px!important;height:42px!important;
+ min-width:42px!important;min-height:42px!important;padding:0!important;margin:0!important;
+ border-radius:50%!important;background:#26343d!important;box-shadow:0 2px 8px #0008!important;
+ font-size:22px!important;line-height:42px!important;text-align:center!important;
+}
+
+/* On small phones, prevent expanded terrain card from covering weather grid */
+@media(max-width:700px){
+ #weatherBox:not(.is-collapsed){max-height:39vh}
+ #terrainBox:not(.is-collapsed){bottom:205px!important}
+}
 </style></head><body>
 <div id="map"></div><header><div><b>MoonMap</b><small>Trykk i kartet for observasjonspunkt</small></div><div><button id="loc">⌖</button></div></header>
 <section id="info"><span>🌙</span><div><small>AZIMUT</small><b id="az">–</b></div><div><small>HØYDE</small><b id="alt">–</b></div><div><small>LYS</small><b id="ill">–</b></div><div><small>OPP / NED</small><b id="rs">–</b></div></section>
@@ -196,4 +244,18 @@ async function loadWeather(){
 document.getElementById('weatherRefresh').onclick=loadWeather;
 setTimeout(loadWeather,300);
 document.querySelectorAll('#weatherBox .panel-toggle').forEach(b=>b.addEventListener('click',()=>{const el=document.getElementById(b.dataset.target);const c=el.classList.toggle('is-collapsed');b.textContent=c?'+':'−';}));
+</script><script id="v33-behavior">
+(function(){
+ function collapse(id){
+   const el=document.getElementById(id); if(!el || el.classList.contains('is-collapsed')) return;
+   el.classList.add('is-collapsed');
+   const b=el.querySelector('.panel-toggle'); if(b){b.textContent='+';b.setAttribute('aria-label','Utvid')}
+ }
+ document.getElementById('terrainCalc')?.addEventListener('click',()=>collapse('weatherBox'));
+ document.getElementById('weatherRefresh')?.addEventListener('click',()=>collapse('terrainBox'));
+ // Reflow Leaflet after every panel toggle.
+ document.addEventListener('click',e=>{
+   if(e.target.classList.contains('panel-toggle')) setTimeout(()=>map.invalidateSize(),30);
+ });
+})();
 </script></body></html>
